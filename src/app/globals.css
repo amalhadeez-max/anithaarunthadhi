@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.75rem;
+  }
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .prose-store {
+    @apply text-[15px] leading-7 text-neutral-700;
+  }
+  .prose-store h1,
+  .prose-store h2,
+  .prose-store h3 {
+    @apply mb-2 mt-5 font-semibold text-neutral-900;
+  }
+  .prose-store h1 {
+    @apply text-2xl;
+  }
+  .prose-store h2 {
+    @apply text-xl;
+  }
+  .prose-store h3 {
+    @apply text-lg;
+  }
+  .prose-store p {
+    @apply mb-3;
+  }
+  .prose-store ul {
+    @apply mb-3 list-disc pl-5;
+  }
+  .prose-store ol {
+    @apply mb-3 list-decimal pl-5;
+  }
+  .prose-store a {
+    @apply text-brand underline;
+  }
+  .prose-store strong {
+    @apply font-semibold text-neutral-900;
+  }
+  .prose-store table {
+    @apply my-3 w-full text-sm;
+  }
+  .prose-store td,
+  .prose-store th {
+    @apply border px-2 py-1;
+  }
+}
+
+/* ─── Loaders ─────────────────────────────────────────────────────────────── */
+@keyframes steer {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes nav-bar {
+  0% {
+    width: 0%;
+  }
+  40% {
+    width: 55%;
+  }
+  80% {
+    width: 85%;
+  }
+  100% {
+    width: 92%;
+  }
+}
+.animate-steer {
+  transform-origin: center;
+  animation: steer 1.2s cubic-bezier(0.55, 0.1, 0.45, 0.9) infinite;
+}
+.animate-nav-bar {
+  animation: nav-bar 6s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-steer {
+    animation: none;
+  }
+  .animate-nav-bar {
+    animation-duration: 0.01ms;
+    width: 92%;
+  }
+}
+
+/* ─── About → Find-us scene ───────────────────────────────────────────────── */
+@keyframes scene-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.5px); }
+}
+@keyframes scene-pin-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes scene-pin-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 0.6; }
+  50% { transform: scaleX(0.6); opacity: 0.3; }
+}
+@keyframes scene-puff {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  20% { opacity: 0.8; }
+  100% { transform: translate(-22px, -14px) scale(1.6); opacity: 0; }
+}
+@keyframes scene-road {
+  to { stroke-dashoffset: -24; }
+}
+.scene-car { animation: scene-bob 2.4s ease-in-out infinite; }
+.scene-person { animation: scene-bob 3.2s ease-in-out infinite 0.6s; transform-origin: 248px 126px; }
+.scene-wheel { animation: steer 6s linear infinite; }
+.scene-pin { animation: scene-pin-bounce 1.6s ease-in-out infinite; transform-origin: 150px 92px; }
+.scene-pin-shadow { animation: scene-pin-shadow 1.6s ease-in-out infinite; transform-origin: 150px 94px; }
+.scene-puff { animation: scene-puff 2.2s ease-out infinite; transform-origin: 84px 112px; }
+.scene-puff-2 { animation-delay: 1.1s; }
+.scene-road { animation: scene-road 1.6s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .scene-car, .scene-person, .scene-wheel, .scene-pin, .scene-pin-shadow, .scene-puff, .scene-road {
+    animation: none;
+  }
+}

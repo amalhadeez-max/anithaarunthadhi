@@ -14,6 +14,8 @@ type Slide = {
   secondary: { label: string; href: string };
   image: string;
   imageClass?: string;
+  /** "bleed": photo fills the right 62% (slide 1). "card": photo sits in a framed panel on the right. */
+  layout?: "bleed" | "card";
 };
 
 const SLIDES: Slide[] = [
@@ -35,7 +37,8 @@ const SLIDES: Slide[] = [
     primary: { label: "Shop 2 Wheeler", href: "/products?segment=two_wheeler" },
     secondary: { label: "All Brands", href: "/products" },
     image: "/home/category-2-wheeler.webp",
-    imageClass: "origin-top scale-[1.5] object-top", // placeholder crop carries mockup text in its bottom third
+    imageClass: "origin-top scale-[1.4] object-top", // placeholder crop carries mockup text in its bottom third
+    layout: "card",
   },
   {
     eyebrow: "Four wheelers",
@@ -45,7 +48,8 @@ const SLIDES: Slide[] = [
     primary: { label: "Shop 4 Wheeler", href: "/products?segment=four_wheeler" },
     secondary: { label: "All Brands", href: "/products" },
     image: "/home/category-4-wheeler.webp",
-    imageClass: "origin-top scale-[1.5] object-top", // placeholder crop carries mockup text in its bottom third
+    imageClass: "origin-top scale-[1.4] object-top", // placeholder crop carries mockup text in its bottom third
+    layout: "card",
   },
   {
     eyebrow: "Trucks & commercial",
@@ -55,7 +59,8 @@ const SLIDES: Slide[] = [
     primary: { label: "Shop Truck", href: "/products?segment=truck" },
     secondary: { label: "All Brands", href: "/products" },
     image: "/home/category-truck.webp",
-    imageClass: "origin-top scale-[1.5] object-top", // placeholder crop carries mockup text in its bottom third
+    imageClass: "origin-top scale-[1.4] object-top", // placeholder crop carries mockup text in its bottom third
+    layout: "card",
   },
 ];
 
@@ -92,18 +97,30 @@ export function HeroCarousel() {
             )}
             aria-hidden={!active}
           >
-            {/* image: full-bleed on mobile, right 62% with soft mask on desktop */}
-            <div className="absolute inset-0 md:left-auto md:right-0 md:w-[62%] md:[mask-image:linear-gradient(90deg,transparent_0%,#000_22%,#000_92%,transparent_100%)]">
+            {/* image: full-bleed on mobile; on desktop either bleeds into the right 62% or sits in a framed card */}
+            <div
+              className={cn(
+                "absolute inset-0 overflow-hidden",
+                s.layout === "card"
+                  ? "md:inset-auto md:bottom-[11%] md:right-[5%] md:top-[11%] md:w-[44%] md:rounded-2xl md:shadow-[0_24px_60px_rgba(0,0,0,0.45)] md:ring-1 md:ring-white/10 lg:right-[6%] lg:w-[42%]"
+                  : "md:left-auto md:right-0 md:w-[62%] md:[mask-image:linear-gradient(90deg,transparent_0%,#000_22%,#000_92%,transparent_100%)]",
+              )}
+            >
               <Image
                 src={s.image}
                 alt=""
                 fill
                 priority={i === 0}
-                sizes="(max-width: 768px) 100vw, 62vw"
+                sizes={s.layout === "card" ? "(max-width: 768px) 100vw, 44vw" : "(max-width: 768px) 100vw, 62vw"}
                 className={cn("object-cover", s.imageClass)}
               />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/20 md:bg-gradient-to-r md:from-navy md:via-navy/60 md:to-transparent" />
+            <div
+              className={cn(
+                "absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/20",
+                s.layout === "card" ? "md:bg-none" : "md:bg-gradient-to-r md:from-navy md:via-navy/60 md:to-transparent",
+              )}
+            />
 
             <div className="container relative flex h-full items-end pb-24 md:items-center md:pb-0 md:pl-14">
               <div className="flex max-w-[560px] flex-col gap-4 md:gap-5">

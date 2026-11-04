@@ -32,7 +32,7 @@ export function Wordmark({
   return (
     <span
       className={cn(
-        "inline-flex items-baseline gap-0.5 font-black tracking-tight",
+        "inline-flex items-baseline gap-0.5 font-display font-extrabold tracking-tight",
         size === "lg" ? "text-3xl" : size === "sm" ? "text-lg" : "text-xl md:text-2xl",
         className,
       )}

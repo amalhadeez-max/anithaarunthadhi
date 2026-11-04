@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { assertAdmin } from "@/lib/auth";
 import { contactSchema, zodMessage } from "@/lib/validations";
@@ -58,5 +59,36 @@ export async function deleteMessage(id: string): Promise<ActionResult> {
     return { ok: true, message: "Message deleted" };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Failed" };
+  }
+}
+
+const NEWSLETTER_MESSAGE = "Newsletter subscription request from the home page.";
+const newsletterSchema = z.object({ email: z.string().trim().email().max(120) });
+
+/** Home-page newsletter form. Stored as a contact message so it shows up in the admin inbox. */
+export async function subscribeNewsletter(input: unknown): Promise<ActionResult> {
+  try {
+    await assertRateLimit("newsletter", 5, 10 * 60_000);
+    const parsed = newsletterSchema.safeParse(input);
+    if (!parsed.success) return { ok: false, error: "Enter a valid email address" };
+    const email = parsed.data.email.toLowerCase();
+    const existing = await prisma.contactMessage.findFirst({
+      where: { email, message: NEWSLETTER_MESSAGE },
+      select: { id: true },
+    });
+    if (existing) return { ok: true, message: "You're already subscribed." };
+    await prisma.contactMessage.create({
+      data: {
+        firstName: "Newsletter",
+        lastName: "Subscriber",
+        email,
+        subject: "general_inquiry",
+        message: NEWSLETTER_MESSAGE,
+      },
+    });
+    revalidatePath("/admin/messages");
+    return { ok: true, message: "Subscribed! We'll keep you posted on new products and offers." };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Could not subscribe right now" };
   }
 }

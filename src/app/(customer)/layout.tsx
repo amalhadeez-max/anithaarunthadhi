@@ -1,6 +1,7 @@
 import { getSiteSettings } from "@/lib/settings";
 import { getCurrentUser } from "@/lib/auth";
 import { Header } from "@/components/layout/header";
+import { TopBar } from "@/components/layout/top-bar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppButton } from "@/components/layout/whatsapp-button";
 import { CartSync } from "@/components/cart/cart-sync";
@@ -11,6 +12,7 @@ export default async function CustomerLayout({ children }: { children: React.Rea
   const [settings, user] = await Promise.all([getSiteSettings(), getCurrentUser()]);
   return (
     <div className="flex min-h-dvh flex-col">
+      <TopBar phone={settings.contactPhone} email={settings.contactEmail} userName={user?.fullName ?? null} />
       <Header
         storeName={settings.storeName}
         logoUrl={settings.logoUrl}

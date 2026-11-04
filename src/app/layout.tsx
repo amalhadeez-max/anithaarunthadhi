@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import { Suspense } from "react";
 import { Providers } from "@/components/providers";
 import { NavProgress } from "@/components/layout/nav-progress";
@@ -8,6 +8,12 @@ import { publicEnv } from "@/lib/env";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-poppins",
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSiteSettings();
@@ -37,7 +43,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <body className="min-h-dvh font-sans">
         <Providers>
           <Suspense fallback={null}>

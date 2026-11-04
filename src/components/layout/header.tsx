@@ -2,7 +2,22 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Heart, LogOut, Menu, Package, Search, ShieldCheck, ShoppingCart, User, X } from "lucide-react";
+import {
+  Bike,
+  Car,
+  ChevronDown,
+  Heart,
+  LogOut,
+  Menu,
+  Package,
+  Search,
+  ShieldCheck,
+  ShoppingCart,
+  Tags,
+  Truck,
+  User,
+  X,
+} from "lucide-react";
 import { Wordmark } from "./wordmark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,12 +43,22 @@ export type HeaderUser = {
   role: "customer" | "admin";
 } | null;
 
-const NAV = [
+/** Desktop nav. `activeOn` marks the link when the current path starts with it (segment links share /products, so they stay neutral). */
+const NAV: { href: string; label: string; activeOn?: string }[] = [
   { href: "/", label: "Home" },
-  { href: "/products", label: "Products" },
-  { href: "/orders", label: "Orders" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact Us" },
+  { href: "/products?segment=two_wheeler", label: "2 Wheeler" },
+  { href: "/products?segment=four_wheeler", label: "4 Wheeler" },
+  { href: "/products?segment=truck", label: "Truck" },
+  { href: "/products", label: "Brands" },
+  { href: "/about", label: "About Us", activeOn: "/about" },
+  { href: "/contact", label: "Contact Us", activeOn: "/contact" },
+];
+
+const PRODUCT_MENU = [
+  { href: "/products", label: "All products", icon: Tags },
+  { href: "/products?segment=two_wheeler", label: "2 Wheeler accessories", icon: Bike },
+  { href: "/products?segment=four_wheeler", label: "4 Wheeler accessories", icon: Car },
+  { href: "/products?segment=truck", label: "Truck accessories", icon: Truck },
 ];
 
 export function Header({
@@ -63,153 +88,121 @@ export function Header({
     router.push(term ? `/products?q=${encodeURIComponent(term)}` : "/products");
   }
 
-  return (
-    <header className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-      <div className="container flex h-14 items-center gap-2 md:h-16">
-        {/* Left: hamburger (mobile) / nav (desktop) */}
-        <div className="flex flex-1 items-center gap-1 md:flex-none">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[85vw] max-w-xs p-0">
-              <SheetHeader className="border-b p-4 text-left">
-                <SheetTitle>
-                  <Wordmark name={storeName} logoUrl={logoUrl} size="sm" />
-                </SheetTitle>
-              </SheetHeader>
-              <nav className="flex flex-col p-2" aria-label="Main">
-                {NAV.map((n) => (
-                  <Link
-                    key={n.href}
-                    href={n.href}
-                    className={cn(
-                      "rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100",
-                      pathname === n.href && "bg-neutral-100",
-                    )}
-                  >
-                    {n.label}
-                  </Link>
-                ))}
-                <div className="my-2 h-px bg-border" />
-                <Link
-                  href="/wishlist"
-                  className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100"
-                >
-                  Wishlist
-                </Link>
-                <Link
-                  href="/cart"
-                  className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100"
-                >
-                  Cart
-                </Link>
-                {user ? (
-                  <>
-                    <Link
-                      href="/profile"
-                      className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100"
-                    >
-                      Profile
-                    </Link>
-                    {user.role === "admin" && (
-                      <Link
-                        href="/admin"
-                        className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100"
-                      >
-                        Admin dashboard
-                      </Link>
-                    )}
-                    <form action="/auth/signout" method="post">
-                      <button
-                        type="submit"
-                        className="w-full rounded-md px-3 py-3 text-left text-base font-medium text-destructive hover:bg-neutral-100"
-                      >
-                        Sign out
-                      </button>
-                    </form>
-                  </>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100"
-                  >
-                    Sign in
-                  </Link>
-                )}
-              </nav>
-            </SheetContent>
-          </Sheet>
-          <Link href="/" className="hidden md:block" aria-label={`${storeName} home`}>
-            <Wordmark name={storeName} logoUrl={logoUrl} />
-          </Link>
-        </div>
+  const isHome = pathname === "/";
+  const isProducts = pathname.startsWith("/products");
 
-        {/* Centre: wordmark on mobile / nav on desktop */}
-        <div className="flex flex-1 justify-center">
-          <Link href="/" className="md:hidden" aria-label={`${storeName} home`}>
-            <Wordmark name={storeName} logoUrl={logoUrl} size="sm" />
-          </Link>
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
-            {NAV.map((n) => (
-              <Link
-                key={n.href}
-                href={n.href}
+  return (
+    <header className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
+      <div className="container flex h-[60px] items-center gap-2 md:h-[72px]">
+        {/* Mobile menu */}
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="-ml-2 lg:hidden" aria-label="Open menu">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[85vw] max-w-xs p-0">
+            <SheetHeader className="border-b p-4 text-left">
+              <SheetTitle>
+                <Wordmark name={storeName} logoUrl={logoUrl} size="sm" />
+              </SheetTitle>
+            </SheetHeader>
+            <nav className="flex flex-col p-2" aria-label="Main">
+              {[{ href: "/", label: "Home" }, ...PRODUCT_MENU, { href: "/about", label: "About Us" }, { href: "/contact", label: "Contact Us" }].map((n) => (
+                <Link key={n.href} href={n.href} className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100">
+                  {n.label}
+                </Link>
+              ))}
+              <div className="my-2 h-px bg-border" />
+              <Link href="/wishlist" className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100">
+                Wishlist {wishCount > 0 && `(${wishCount})`}
+              </Link>
+              <Link href="/cart" className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100">
+                Cart
+              </Link>
+              <Link href="/orders" className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100">
+                Track order
+              </Link>
+              {user ? (
+                <>
+                  <Link href="/profile" className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100">
+                    Profile
+                  </Link>
+                  {user.role === "admin" && (
+                    <Link href="/admin" className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100">
+                      Admin dashboard
+                    </Link>
+                  )}
+                  <form action="/auth/signout" method="post">
+                    <button type="submit" className="w-full rounded-md px-3 py-3 text-left text-base font-medium text-destructive hover:bg-neutral-100">
+                      Sign out
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <Link href="/login" className="rounded-md px-3 py-3 text-base font-medium hover:bg-neutral-100">
+                  Login / Register
+                </Link>
+              )}
+            </nav>
+          </SheetContent>
+        </Sheet>
+
+        {/* Logo */}
+        <Link href="/" className="flex-1 lg:flex-none" aria-label={`${storeName} home`}>
+          <Wordmark name={storeName} logoUrl={logoUrl} className="text-[21px] md:text-[26px]" />
+        </Link>
+
+        {/* Desktop nav */}
+        <nav className="hidden h-full flex-1 items-center justify-center gap-5 lg:flex xl:gap-8" aria-label="Main">
+          <NavLink href="/" active={isHome}>Home</NavLink>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900",
-                  (pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href))) &&
-                    "text-neutral-900",
+                  "flex h-[72px] items-center gap-1 whitespace-nowrap border-b-[3px] border-transparent text-[15px] font-medium text-neutral-800 transition-colors hover:text-brand",
+                  isProducts && "border-brand text-brand",
                 )}
               >
-                {n.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
+                Products <ChevronDown className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-60">
+              {PRODUCT_MENU.map((m) => (
+                <DropdownMenuItem key={m.href} asChild>
+                  <Link href={m.href}>
+                    <m.icon /> {m.label}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {NAV.slice(1).map((n) => (
+            <NavLink key={n.href} href={n.href} active={n.activeOn !== undefined && pathname.startsWith(n.activeOn)}>
+              {n.label}
+            </NavLink>
+          ))}
+        </nav>
 
-        {/* Right: icons */}
-        <div className="flex flex-1 items-center justify-end gap-0.5 md:flex-none">
+        {/* Actions */}
+        <div className="flex items-center gap-1 md:gap-3">
           <Button variant="ghost" size="icon" aria-label="Search" onClick={() => setSearchOpen((v) => !v)}>
-            {searchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+            {searchOpen ? <X className="h-5 w-5 md:h-6 md:w-6" /> : <Search className="h-5 w-5 md:h-6 md:w-6" />}
           </Button>
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            aria-label={`Wishlist, ${wishCount} items`}
-            className="relative"
-          >
-            <Link href="/wishlist">
-              <Heart className="h-5 w-5" />
-              {wishCount > 0 && <Dot>{wishCount}</Dot>}
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            aria-label={`Cart, ${cartCount} items`}
-            className="relative"
-          >
+          <Button asChild variant="ghost" size="icon" aria-label={`Cart, ${cartCount} items`} className="relative">
             <Link href="/cart">
-              <ShoppingCart className="h-5 w-5" />
-              {hydrated && cartCount > 0 && <Dot>{cartCount > 99 ? "99+" : cartCount}</Dot>}
+              <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
+              {hydrated && <Dot>{cartCount > 99 ? "99+" : cartCount}</Dot>}
             </Link>
           </Button>
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button
-                  className="ml-1 rounded-full ring-offset-2 focus-visible:ring-2"
-                  aria-label="Account menu"
-                >
+                <button className="ml-1 rounded-full ring-offset-2 focus-visible:ring-2" aria-label="Account menu">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
-                    <AvatarFallback className="text-xs">
-                      {initials(user.fullName, user.email[0]?.toUpperCase())}
-                    </AvatarFallback>
+                    <AvatarFallback className="text-xs">{initials(user.fullName, user.email[0]?.toUpperCase())}</AvatarFallback>
                   </Avatar>
                 </button>
               </DropdownMenuTrigger>
@@ -220,25 +213,17 @@ export function Header({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/profile">
-                    <User /> Profile
-                  </Link>
+                  <Link href="/profile"><User /> Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/orders">
-                    <Package /> My orders
-                  </Link>
+                  <Link href="/orders"><Package /> My orders</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/wishlist">
-                    <Heart /> Wishlist
-                  </Link>
+                  <Link href="/wishlist"><Heart /> Wishlist</Link>
                 </DropdownMenuItem>
                 {user.role === "admin" && (
                   <DropdownMenuItem asChild>
-                    <Link href="/admin">
-                      <ShieldCheck /> Admin dashboard
-                    </Link>
+                    <Link href="/admin"><ShieldCheck /> Admin dashboard</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -254,7 +239,7 @@ export function Header({
           ) : (
             <Button asChild variant="ghost" size="icon" aria-label="Sign in">
               <Link href="/login">
-                <User className="h-5 w-5" />
+                <User className="h-5 w-5 md:h-6 md:w-6" />
               </Link>
             </Button>
           )}
@@ -272,7 +257,7 @@ export function Header({
               aria-label="Search products"
               className="h-10"
             />
-            <Button type="submit" size="sm" className="h-10">
+            <Button type="submit" size="sm" className="h-10 bg-brand hover:bg-brand-dark">
               Search
             </Button>
           </form>
@@ -282,9 +267,23 @@ export function Header({
   );
 }
 
+function NavLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "flex h-[72px] items-center whitespace-nowrap border-b-[3px] border-transparent text-[15px] font-medium text-neutral-800 transition-colors hover:text-brand",
+        active && "border-brand text-brand",
+      )}
+    >
+      {children}
+    </Link>
+  );
+}
+
 function Dot({ children }: { children: React.ReactNode }) {
   return (
-    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold leading-none text-white">
+    <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold leading-none text-white">
       {children}
     </span>
   );

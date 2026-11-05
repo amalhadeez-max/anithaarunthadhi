@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getSiteSettings } from "@/lib/settings";
 import { getCurrentUser } from "@/lib/auth";
 import { Header } from "@/components/layout/header";
@@ -13,21 +14,23 @@ export default async function CustomerLayout({ children }: { children: React.Rea
   return (
     <div className="flex min-h-dvh flex-col">
       <TopBar phone={settings.contactPhone} email={settings.contactEmail} userName={user?.fullName ?? null} />
-      <Header
-        storeName={settings.storeName}
-        logoUrl={settings.logoUrl}
-        user={
-          user
-            ? {
-                id: user.id,
-                fullName: user.fullName,
-                email: user.email,
-                avatarUrl: user.avatarUrl,
-                role: user.role,
-              }
-            : null
-        }
-      />
+      <Suspense>
+        <Header
+          storeName={settings.storeName}
+          logoUrl={settings.logoUrl}
+          user={
+            user
+              ? {
+                  id: user.id,
+                  fullName: user.fullName,
+                  email: user.email,
+                  avatarUrl: user.avatarUrl,
+                  role: user.role,
+                }
+              : null
+          }
+        />
+      </Suspense>
       <main id="main" className="flex-1">
         {children}
       </main>

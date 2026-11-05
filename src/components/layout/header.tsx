@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Bike,
   Car,
@@ -43,12 +43,15 @@ export type HeaderUser = {
   role: "customer" | "admin";
 } | null;
 
-/** Desktop nav. `activeOn` marks the link when the current path starts with it (segment links share /products, so they stay neutral). */
-const NAV: { href: string; label: string; activeOn?: string }[] = [
+/**
+ * Desktop nav. `activeOn` marks the link when the current path starts with it;
+ * `segment` marks it when `/products?segment=` matches.
+ */
+const NAV: { href: string; label: string; activeOn?: string; segment?: string }[] = [
   { href: "/", label: "Home" },
-  { href: "/products?segment=two_wheeler", label: "2 Wheeler" },
-  { href: "/products?segment=four_wheeler", label: "4 Wheeler" },
-  { href: "/products?segment=truck", label: "Truck" },
+  { href: "/products?segment=two_wheeler", label: "2 Wheeler", segment: "two_wheeler" },
+  { href: "/products?segment=four_wheeler", label: "4 Wheeler", segment: "four_wheeler" },
+  { href: "/products?segment=truck", label: "Truck", segment: "truck" },
   { href: "/products", label: "Brands" },
   { href: "/about", label: "About Us", activeOn: "/about" },
   { href: "/contact", label: "Contact Us", activeOn: "/contact" },
@@ -71,6 +74,7 @@ export function Header({
   user: HeaderUser;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -89,7 +93,8 @@ export function Header({
   }
 
   const isHome = pathname === "/";
-  const isProducts = pathname.startsWith("/products");
+  const segment = pathname.startsWith("/products") ? searchParams.get("segment") : null;
+  const isProducts = pathname.startsWith("/products") && !segment;
 
   return (
     <header className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
@@ -179,7 +184,14 @@ export function Header({
             </DropdownMenuContent>
           </DropdownMenu>
           {NAV.slice(1).map((n) => (
-            <NavLink key={n.href} href={n.href} active={n.activeOn !== undefined && pathname.startsWith(n.activeOn)}>
+            <NavLink
+              key={n.href}
+              href={n.href}
+              active={
+                (n.activeOn !== undefined && pathname.startsWith(n.activeOn)) ||
+                (n.segment !== undefined && n.segment === segment)
+              }
+            >
               {n.label}
             </NavLink>
           ))}

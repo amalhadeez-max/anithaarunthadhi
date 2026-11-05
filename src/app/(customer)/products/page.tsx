@@ -51,11 +51,13 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
           </Link>{" "}
           <ChevronRight className="inline h-3 w-3" /> Products
         </nav>
-        <BrandGrid
-          brands={brands}
-          initialTab={(q.segment as Segment | undefined) ?? "all"}
-          title="Choose your vehicle brand"
-        />
+        <Suspense>
+          <BrandGrid
+            brands={brands}
+            initialTab={(q.segment as Segment | undefined) ?? "all"}
+            title="Choose your vehicle brand"
+          />
+        </Suspense>
       </div>
     );
   }

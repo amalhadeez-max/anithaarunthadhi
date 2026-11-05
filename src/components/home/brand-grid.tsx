@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Bike, Car, Search, Truck, type LucideIcon } from "lucide-react";
 import type { Segment } from "@prisma/client";
 import type { BrandCard } from "@/types";
@@ -9,6 +10,7 @@ import { SEGMENTS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 type Tab = "all" | Segment;
+const TABS = new Set<string>(["all", "two_wheeler", "four_wheeler", "truck"]);
 
 const SEGMENT_ICON: Record<Segment, LucideIcon> = {
   two_wheeler: Bike,
@@ -20,6 +22,10 @@ const SEGMENT_ICON: Record<Segment, LucideIcon> = {
  * Brand directory in the style of a logo catalogue: a search box + segment tabs
  * above large white cards, each with a segment badge, a big centred logo and the
  * brand name underneath. 2 cols on mobile → 5 on desktop.
+ *
+ * The active tab lives in the URL (`?segment=`) so header links such as
+ * "4 Wheeler" switch it even when this component is already mounted, and so
+ * the back button and shared links restore it.
  */
 export function BrandGrid({
   brands,
@@ -32,8 +38,20 @@ export function BrandGrid({
   title?: string;
   compact?: boolean;
 }) {
-  const [tab, setTab] = useState<Tab>(initialTab);
+  const router = useRouter();
+  const pathname = usePathname();
+  const sp = useSearchParams();
+  const fromUrl = sp.get("segment");
+  const tab: Tab = fromUrl && TABS.has(fromUrl) ? (fromUrl as Tab) : initialTab;
   const [query, setQuery] = useState("");
+
+  function setTab(next: Tab) {
+    const params = new URLSearchParams(sp.toString());
+    if (next === "all") params.delete("segment");
+    else params.set("segment", next);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
 
   const list = useMemo(() => {
     const q = query.trim().toLowerCase();
